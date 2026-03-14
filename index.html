@@ -2,39 +2,34 @@
 <html>
 <head>
     <title>Pi IoT Controller</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
-        .card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; margin: 10px; min-width: 300px; }
-        button { padding: 15px 25px; margin: 10px; cursor: pointer; border: none; border-radius: 5px; color: white; font-size: 16px; }
-        .btn-room { background: #28a745; }
-        .status { color: #666; font-size: 0.9em; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; }
+        button { padding: 15px; margin: 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h2>Robot Navigation</h2>
-        <button class="btn-room" onclick="send('room1')">Send to Room 1</button>
-        <button class="btn-room" onclick="send('room2')">Send to Room 2</button>
-        <p id="status" class="status">Connecting to Pi...</p>
+        <h2>Room Navigation</h2>
+        <button onclick="sendRoom('room1')">Go to Room 1</button>
+        <button onclick="sendRoom('room2')">Go to Room 2</button>
+        <p id="status">Connecting...</p>
     </div>
 
     <script>
-        // Connect to Pi's IP via WebSockets
+        // Browser connects to the Pi Broker via WebSockets
         const client = mqtt.connect('ws://192.168.1.50:9001');
 
         client.on('connect', () => {
             document.getElementById('status').innerText = "Connected to Pi Broker";
         });
 
-        function send(room) {
+        function sendRoom(room) {
             if (client.connected) {
-                // Publish to the topic your ESP32 listens to
+                // This sends the message to your ESP32
                 client.publish('esp32', room);
                 console.log("Published: " + room);
-            } else {
-                alert("Broker not reachable!");
             }
         }
     </script>
