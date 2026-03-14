@@ -1,37 +1,99 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Pi IoT Controller</title>
+<title>Pi IoT Controller</title>
 <script src="mqtt.min.js"></script>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
-        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; }
-        button { padding: 15px; margin: 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
-    </style>
+
+<style>
+body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
+
+.card {
+background: white;
+padding: 20px;
+border-radius: 10px;
+box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+display: inline-block;
+}
+
+button {
+padding: 15px;
+margin: 10px;
+cursor: pointer;
+background: #28a745;
+color: white;
+border: none;
+border-radius: 5px;
+}
+
+.sensor{
+font-size:20px;
+margin:10px;
+}
+</style>
 </head>
+
 <body>
-    <div class="card">
-        <h2>Room Navigation</h2>
-        <button onclick="sendRoom('room1')">Go to Room 1</button>
-        <button onclick="sendRoom('room2')">Go to Room 2</button>
-        <p id="status">Connecting...</p>
-    </div>
 
-    <script>
-        // Browser connects to the Pi Broker via WebSockets
-        const client = mqtt.connect('ws://192.168.1.50:9001');
+<div class="card">
 
-        client.on('connect', () => {
-            document.getElementById('status').innerText = "Connected to Pi Broker";
-        });
+<h2>Room Navigation</h2>
 
-        function sendRoom(room) {
-            if (client.connected) {
-                // This sends the message to your ESP32
-                client.publish('esp32', room);
-                console.log("Published: " + room);
-            }
-        }
-    </script>
+<button onclick="sendRoom('room1')">Go to Room 1</button>
+<button onclick="sendRoom('room2')">Go to Room 2</button>
+
+<p id="status">Connecting...</p>
+
+<h2>Sensors</h2>
+
+<div class="sensor">Temperature: <span id="temp">--</span> °C</div>
+<div class="sensor">Humidity: <span id="hum">--</span> %</div>
+<div class="sensor">Gas: <span id="gas">--</span></div>
+
+</div>
+
+<script>
+
+// Connect to Pi MQTT Broker
+const client = mqtt.connect('ws://192.168.1.50:9001');
+
+client.on('connect', () => {
+
+document.getElementById('status').innerText = "Connected to Pi Broker";
+
+// subscribe to sensor topics
+client.subscribe("room1/temp");
+client.subscribe("room1/humidity");
+client.subscribe("room1/mq2");
+
+});
+
+// receive messages
+client.on('message', (topic, message) => {
+
+const msg = message.toString();
+
+if(topic === "room1/temp"){
+document.getElementById("temp").innerText = msg;
+}
+
+if(topic === "room1/humidity"){
+document.getElementById("hum").innerText = msg;
+}
+
+if(topic === "room1/gas"){
+document.getElementById("gas").innerText = msg;
+}
+
+});
+
+// send room command to ESP32
+function sendRoom(room){
+if(client.connected){
+client.publish('esp32', room);
+}
+}
+
+</script>
+
 </body>
 </html>
