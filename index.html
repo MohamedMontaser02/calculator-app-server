@@ -50,49 +50,43 @@ margin:10px;
 <div class="sensor">Gas: <span id="gas">--</span></div>
 
 </div>
-
 <script>
+    // Connect to Pi MQTT Broker
+    const client = mqtt.connect('ws://192.168.1.50:9001');
 
-// Connect to Pi MQTT Broker
-const client = mqtt.connect('ws://192.168.1.50:9001');
+    client.on('connect', () => {
+        document.getElementById('status').innerText = "Connected to Pi Broker";
+        
+        // Subscribe to exactly what the ESP32 is sending
+        client.subscribe("room1/temp");
+        client.subscribe("room1/humidity");
+        client.subscribe("room1/mq2"); // Matches the subscription
+    });
 
-client.on('connect', () => {
+    client.on('message', (topic, message) => {
+        const msg = message.toString();
 
-document.getElementById('status').innerText = "Connected to Pi Broker";
+        if(topic === "room1/temp") {
+            document.getElementById("temp").innerText = msg;
+        }
 
-// subscribe to sensor topics
-client.subscribe("room1/temp");
-client.subscribe("room1/humidity");
-client.subscribe("room1/mq2");
+        if(topic === "room1/humidity") {
+            document.getElementById("hum").innerText = msg;
+        }
 
-});
+        // Changed from "room1/gas" to "room1/mq2" to match the subscription above
+        if(topic === "room1/mq2") {
+            document.getElementById("gas").innerText = msg;
+        }
+    });
 
-// receive messages
-client.on('message', (topic, message) => {
-
-const msg = message.toString();
-
-if(topic === "room1/temp"){
-document.getElementById("temp").innerText = msg;
-}
-
-if(topic === "room1/humidity"){
-document.getElementById("hum").innerText = msg;
-}
-
-if(topic === "room1/gas"){
-document.getElementById("gas").innerText = msg;
-}
-
-});
-
-// send room command to ESP32
-function sendRoom(room){
-if(client.connected){
-client.publish('esp32', room);
-}
-}
-
+    function sendRoom(room) {
+        if(client.connected) {
+            // Your ESP32 should be listening to the 'esp32' topic
+            client.publish('esp32', room);
+            console.log("Command sent: " + room);
+        }
+    }
 </script>
 
 </body>
