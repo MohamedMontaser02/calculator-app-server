@@ -1,90 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Pi IoT Controller</title>
-<script src="mqtt.min.js"></script>
-
-<style>
-body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
-
-.card {
-background: white;
-padding: 20px;
-border-radius: 10px;
-box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-display: inline-block;
-}
-
-button {
-padding: 15px;
-margin: 10px;
-cursor: pointer;
-background: #28a745;
-color: white;
-border: none;
-border-radius: 5px;
-}
-
-.sensor{
-font-size:20px;
-margin:10px;
-}
-</style>
+    <title>Pi IoT Controller</title>
+    <script src="mqtt.min.js"></script>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
+        .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; }
+        button { padding: 15px; margin: 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
+    </style>
 </head>
-
 <body>
+    <div class="card">
+        <h2>Room Navigation</h2>
+        <button onclick="sendRoom('room1')">Go to Room 1</button>
+        <button onclick="sendRoom('room2')">Go to Room 2</button>
+        <p id="status">Connecting...</p>
+    </div>
 
-<div class="card">
+    <script>
+        // Browser connects to the Pi Broker via WebSockets
+        const client = mqtt.connect('ws://192.168.1.50:9001');
 
-<h2>Room Navigation</h2>
+        client.on('connect', () => {
+            document.getElementById('status').innerText = "Connected to Pi Broker";
+        });
 
-<button onclick="sendRoom('room1')">Go to Room 1</button>
-<button onclick="sendRoom('room2')">Go to Room 2</button>
-
-<p id="status">Connecting...</p>
-
-<h2>Sensors</h2>
-
-<div class="sensor">Temperature: <span id="temp">--</span> °C</div>
-<div class="sensor">Humidity: <span id="hum">--</span> %</div>
-<div class="sensor">Gas: <span id="gas">--</span></div>
-
-</div>
-<script>
-    // Connect to Pi MQTT Broker
-    const client = mqtt.connect('ws://192.168.1.50:9001');
-
-    client.on('connect', () => {
-        document.getElementById('status').innerText = "Connected to Pi Broker";
-        
-        // Subscribe to exactly what the ESP32 is sending
-        //client.subscribe("room1/temp");
-       // client.subscribe("room1/humidity");
-        //client.subscribe("room1/mq2"); // Matches the subscription
-    });
-
-/*client.on('message', (topic, message) => {
-    const msg = message.toString();
-
-    if(topic === "room1/temp") {
-        document.getElementById("temp").innerText = msg;
-    }
-    if(topic === "room1/humidity") {
-        document.getElementById("hum").innerText = msg;
-    }
-    // Match this to 'room1/mq2' which is what you subscribed to
-    if(topic === "room1/mq2") {
-        document.getElementById("gas").innerText = msg;
-    }*/
-
-    function sendRoom(room) {
-        if(client.connected) {
-            // Your ESP32 should be listening to the 'esp32' topic
-            client.publish('esp32', room);
-            console.log("Command sent: " + room);
+        function sendRoom(room) {
+            if (client.connected) {
+                // This sends the message to your ESP32
+                client.publish('esp32/location', room);
+                console.log("Published: " + room);
+            }
         }
-    }
-</script>
-
+    </script>
 </body>
 </html>
