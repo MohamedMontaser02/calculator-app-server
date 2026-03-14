@@ -7,6 +7,7 @@
         body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f4f4; }
         .card { background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); display: inline-block; }
         button { padding: 15px; margin: 10px; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
+        .sensor { font-size:20px; margin:10px; }
     </style>
 </head>
 <body>
@@ -15,21 +16,46 @@
         <button onclick="sendRoom('room1')">Go to Room 1</button>
         <button onclick="sendRoom('room2')">Go to Room 2</button>
         <p id="status">Connecting...</p>
+
+        <h2>Sensors</h2>
+        <div class="sensor">Temperature: <span id="temp">--</span> °C</div>
+        <div class="sensor">Humidity: <span id="hum">--</span> %</div>
+        <div class="sensor">Gas: <span id="gas">--</span></div>
     </div>
 
     <script>
-        // Browser connects to the Pi Broker via WebSockets
+        // Connect to Pi MQTT Broker via WebSockets
         const client = mqtt.connect('ws://192.168.1.50:9001');
 
         client.on('connect', () => {
             document.getElementById('status').innerText = "Connected to Pi Broker";
+            document.getElementById('status').style.color = "green";
+            
+            // Listen for data from the ESP32
+            client.subscribe("room1/temp");
+            client.subscribe("room1/humidity");
+            client.subscribe("room1/mq2");
+        });
+
+        client.on('message', (topic, message) => {
+            const msg = message.toString();
+
+            if(topic === "room1/temp") {
+                document.getElementById("temp").innerText = msg;
+            }
+            if(topic === "room1/humidity") {
+                document.getElementById("hum").innerText = msg;
+            }
+            if(topic === "room1/mq2") {
+                document.getElementById("gas").innerText = msg;
+            }
         });
 
         function sendRoom(room) {
-            if (client.connected) {
-                // This sends the message to your ESP32
-                client.publish('esp32/location', room);
-                console.log("Published: " + room);
+            if(client.connected) {
+                // Matches the topic your ESP32 is listening to
+                client.publish('esp32', room);
+                console.log("Command sent: " + room);
             }
         }
     </script>
