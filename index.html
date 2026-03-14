@@ -24,7 +24,7 @@
         <div class="sensor">Air Quality: <span id="air">--</span></div>
         <div class="sensor">Light: <span id="light">--</span></div>
         <div class="sensor">Occupancy: <span id="occupancy">--</span></div>
-        <div class="sensor">Magnetic: <span id="magnetic">--</span></div>
+        <div class="sensor">Magnetic: <span id="magnet">--</span></div>
 
     </div>
 
@@ -43,7 +43,7 @@
             client.subscribe("room1/mq135");
             client.subscribe("room1/ldr");
             client.subscribe("room1/occupancy");
-            client.subscribe("room1/magnetic");
+            client.subscribe("room1/magnet");
 
         });
 
@@ -68,8 +68,8 @@
             if(topic === "room1/occupancy") {
                 document.getElementById("occupancy").innerText = msg;
             }
-            if(topic === "room1/magnetic") {
-                document.getElementById("magnetic").innerText = msg;
+            if(topic === "room1/magnet") {
+                document.getElementById("magnet").innerText = msg;
             }
 
 
