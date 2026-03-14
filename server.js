@@ -1,12 +1,15 @@
-const express = require('express');
-const path = require('path');
-const app = express();
+// Change 'localhost' or 'respberry.local' to this:
+const client = mqtt.connect('ws://192.168.1.50:9001');
 
-app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+client.on('connect', () => {
+    console.log("Connected to Pi Broker at 192.168.1.50");
+    document.getElementById('status').innerText = "Status: Connected";
 });
 
-// Run with 'sudo node server.js' to use port 80
-app.listen(80, '0.0.0.0', () => {
-    console.log('Control panel ready at http://192.168.1.50');
-});
+function send(room) {
+    if (client.connected) {
+        // Ensure this matches the topic your ESP32 is listening to
+        client.publish('esp32', room); 
+        console.log("Sent: " + room);
+    }
+}
