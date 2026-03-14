@@ -21,6 +21,11 @@
         <div class="sensor">Temperature: <span id="temp">--</span> °C</div>
         <div class="sensor">Humidity: <span id="hum">--</span> %</div>
         <div class="sensor">Gas: <span id="gas">--</span></div>
+        <div class="sensor">Air Quality: <span id="air">--</span></div>
+        <div class="sensor">Light: <span id="light">--</span></div>
+        <div class="sensor">Occupancy: <span id="occupancy">--</span></div>
+        <div class="sensor">Magnetic: <span id="magnetic">--</span></div>
+
     </div>
 
     <script>
@@ -35,6 +40,11 @@
             client.subscribe("room1/temp");
             client.subscribe("room1/humidity");
             client.subscribe("room1/mq2");
+            client.subscribe("room1/mq135");
+            client.subscribe("room1/ldr");
+            client.subscribe("room1/occupancy");
+            client.subscribe("room1/magnetic");
+
         });
 
         client.on('message', (topic, message) => {
@@ -49,6 +59,20 @@
             if(topic === "room1/mq2") {
                 document.getElementById("gas").innerText = msg;
             }
+            if(topic === "room1/mq135") {
+                document.getElementById("air").innerText = msg;
+            }
+            if(topic === "room1/ldr") {
+                document.getElementById("light").innerText = msg;
+            }
+            if(topic === "room1/occupancy") {
+                document.getElementById("occupancy").innerText = msg;
+            }
+            if(topic === "room1/magnetic") {
+                document.getElementById("magnetic").innerText = msg;
+            }
+
+
         });
 
         function sendRoom(room) {
