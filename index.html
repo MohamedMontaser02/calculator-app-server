@@ -58,12 +58,12 @@ margin:10px;
         document.getElementById('status').innerText = "Connected to Pi Broker";
         
         // Subscribe to exactly what the ESP32 is sending
-        client.subscribe("room1/temp");
-        client.subscribe("room1/humidity");
-        client.subscribe("room1/mq2"); // Matches the subscription
+        //client.subscribe("room1/temp");
+       // client.subscribe("room1/humidity");
+        //client.subscribe("room1/mq2"); // Matches the subscription
     });
 
-client.on('message', (topic, message) => {
+/*client.on('message', (topic, message) => {
     const msg = message.toString();
 
     if(topic === "room1/temp") {
@@ -75,8 +75,7 @@ client.on('message', (topic, message) => {
     // Match this to 'room1/mq2' which is what you subscribed to
     if(topic === "room1/mq2") {
         document.getElementById("gas").innerText = msg;
-    }
-});
+    }*/
 
     function sendRoom(room) {
         if(client.connected) {
